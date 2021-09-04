@@ -1,66 +1,105 @@
-import FilesViewer from 'components/FilesViewer';
-import { FC, useState, useMemo } from 'react';
+import { FC, useEffect, Suspense } from 'react';
+import { observer } from 'mobx-react-lite';
+import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { ThemeSwitcherProvider } from 'react-css-theme-switcher';
+import { IntlProvider } from 'react-intl';
+import { ConfigProvider } from 'antd';
 
-const fs = window.require('fs');
-const pathModule = window.require('path');
+// Routes
+import routes from 'routes';
+import authRoutes from 'routes/auth';
+import AuthMiddleWare from 'routes/middlewares/AuthMiddleware';
 
-const { app } = window.require('@electron/remote');
+// Layouts
+import MainLayout from 'layouts/MainLayout';
 
-const formatSize = (size: any) => {
-  let i = Math.floor(Math.log(size) / Math.log(1024));
-  return (
-    ((size / Math.pow(1024, i)) * 1).toFixed(2) +
-    ' ' +
-    ['B', 'KB', 'MB', 'GB', 'TB'][i]
-  );
-};
+// Components
+import Loader from 'components/Loader';
+
+// Store
+import { StoreContext, useStore } from 'contexts';
+import { store } from 'hooks/stores';
+
+// Hooks && Languages
+import AppLocale from 'lang';
+import useBodyClass from 'hooks/useBodyClass';
+
+const themes = { dark: '/assets/css/dark.css', light: '/assets/css/light.css' };
 
 const App: FC = () => {
-  const [path, setPath] = useState(app.getAppPath());
-  const [searchString, setSearchString] = useState('');
-  const [files, setFiles] = useState([]);
+  const { mainStore } = useStore();
+  const { theme } = mainStore;
+  const currentAppLocale = AppLocale['en'];
+  const direction = 'ltr';
 
-  useMemo(() => {
-    let _files = fs
-      .readdirSync(path)
-      .map((file: any) => {
-        const stats = fs.statSync(pathModule.join(path, file));
-        return {
-          name: file,
-          size: stats.isFile() ? formatSize(stats.size ?? 0) : null,
-          directory: stats.isDirectory(),
-        };
-      })
-      .sort((a: any, b: any) => {
-        if (a.directory === b.directory) {
-          return a.name.localeCompare(b.name);
+  useBodyClass([direction, theme]);
+
+  useEffect(() => {
+    let preloader = document.getElementById('preloader');
+
+    setTimeout(() => {
+      let fadeEffect = setInterval(() => {
+        if (preloader && !preloader.style.opacity) {
+          preloader.style.opacity = '1';
         }
-        return a.directory ? -1 : 1;
-      });
-    setFiles(_files);
-  }, [path]);
 
-  const filteredFiles = files.filter((file: any) => file.name.startsWith(searchString));
-
-  const onBack = () => setPath(pathModule.dirname(path));
-  const onOpen = (folder: any) => setPath(pathModule.join(path, folder));
+        if (preloader && parseFloat(preloader.style.opacity) > 0) {
+          preloader.style.opacity = (
+            parseFloat(preloader.style.opacity) - 0.1
+          ).toString();
+        } else if (preloader) {
+          clearInterval(fadeEffect);
+          preloader.style.display = 'none';
+        }
+      }, 50);
+    }, 1000);
+  }, []);
 
   return (
     <>
-      <div className="container mt-2">
-        <h4>{path}</h4>
-        <div className="form-group mt-4 mb-2">
-          <input
-            className="form-control form-control-sm"
-            placeholder="File search"
-            onChange={e => setSearchString(e.target.value)}
-            value={searchString}
-          />
-        </div>
-        <FilesViewer files={filteredFiles} onBack={onBack} onOpen={onOpen} />
-      </div>
+      <Loader />
+      <StoreContext.Provider value={store}>
+        <ThemeSwitcherProvider
+          themeMap={themes}
+          defaultTheme={theme}
+          insertionPoint="styles-insertion-point">
+          <IntlProvider
+            locale={currentAppLocale.locale}
+            messages={currentAppLocale.messages}>
+            <ConfigProvider
+              locale={currentAppLocale.antd}
+              direction={direction}>
+              <BrowserRouter>
+                <Suspense fallback={<Loader />}>
+                  <Switch>
+                    <Route exact path="/">
+                      <Redirect to="/auth/login" />
+                    </Route>
+
+                    {authRoutes.map(({ path, component }, i) => (
+                      <Route key={i} path={path} component={component} exact />
+                    ))}
+
+                    {routes.map(({ path, component, authenticated }, i) => (
+                      <MainLayout key={i}>
+                        {authenticated ? (
+                          <AuthMiddleWare>
+                            <Route path={path} component={component} exact />
+                          </AuthMiddleWare>
+                        ) : (
+                          <Route path={path} component={component} exact />
+                        )}
+                      </MainLayout>
+                    ))}
+                  </Switch>
+                </Suspense>
+              </BrowserRouter>
+            </ConfigProvider>
+          </IntlProvider>
+        </ThemeSwitcherProvider>
+      </StoreContext.Provider>
     </>
   );
 };
 
-export default App;
+export default observer(App);

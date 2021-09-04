@@ -4,6 +4,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
+    <link rel="stylesheet" href="/assets/css/fontawesom.css" />
+    <!--styles-insertion-point-->
+
+    <script>
+      document.onreadystatechange = function () {
+        let state = document.readyState;
+        if (state == 'interactive') {
+          document.body.style.overflow = 'hidden';
+        } else if (state == 'complete') {
+          setTimeout(function () {
+            document.body.style.overflow = 'auto';
+          }, 2000);
+        }
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,19 +1,24 @@
-.table > :not(caption) > * > * {
-  vertical-align: middle;
-  cursor: pointer;
-}
+@use 'sass:math';
 
-.table > tbody tr {
-  &:hover {
-    background-color: #dcf8eefd;
-  }
-}
+// abstracts
+@import 'abstracts/variables';
+@import 'abstracts/mixins';
 
-.icon {
-  width: 50px;
-  height: 50px;
+// components
+@import 'components/button';
+@import 'components/form';
+@import 'components/loader';
+@import 'components/login';
 
-  &-img {
-    width: 100%;
-  }
-}
+// layouts
+@import 'layouts/header';
+@import 'layouts/main';
+
+// pages
+@import 'pages/home';
+
+// themes
+@import 'themes/dark';
+@import 'themes/light';
+
+// vendors

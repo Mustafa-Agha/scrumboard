@@ -1,0 +1,41 @@
+.form {
+  &__redirect {
+    &-text {
+      font-size: 14px;
+    }
+  }
+
+  &__wrapper {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__card {
+    border-radius: 5px;
+    border-color: transparent;
+    box-shadow: 0 0 3px 3px rgb(0 0 0 / 1%);
+
+    &__wrapper {
+      & .img__wrapper {
+        display: flex;
+        height: 150px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+      }
+    }
+  }
+
+  &__footer {
+    display: flex;
+    margin-bottom: 25px;
+
+    & button {
+      display: flex;
+      align-items: center;
+    }
+  }
+}

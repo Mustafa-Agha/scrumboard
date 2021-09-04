@@ -1,0 +1,14 @@
+.primary {
+  border-radius: 8px !important;
+  height: 40px;
+
+  & .ant-btn-loading-icon {
+    position: relative;
+
+    & .anticon-loading {
+      position: absolute;
+      bottom: -1px;
+      right: 1px;
+    }
+  }
+}
