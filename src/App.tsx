@@ -40,8 +40,6 @@ const App: FC = () => {
     setFiles(_files);
   }, [path]);
 
-  console.log(files);
-
   const filteredFiles = files.filter((file: any) => file.name.startsWith(searchString));
 
   const onBack = () => setPath(pathModule.dirname(path));
@@ -59,7 +57,7 @@ const App: FC = () => {
             value={searchString}
           />
         </div>
-        <FilesViewer files={files} onBack={onBack} onOpen={onOpen} />
+        <FilesViewer files={filteredFiles} onBack={onBack} onOpen={onOpen} />
       </div>
     </>
   );
